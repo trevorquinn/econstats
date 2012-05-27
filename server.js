@@ -1,68 +1,55 @@
-#!/bin/env node
-//  OpenShift sample Node application
+var express = require("express");
+var zombie = require("zombie");
 
-var express = require('express');
-var fs      = require('fs');
-
-//  Local cache for static content [fixed and loaded at startup]
-var zcache = { 'index.html': '' };
-zcache['index.html'] = fs.readFileSync('./index.html'); //  Cache index.html
-
-// Create "express" server.
-var app  = express.createServer();
-
-
-/*  =====================================================================  */
-/*  Setup route handlers.  */
-/*  =====================================================================  */
-
-// Handler for GET /health
-app.get('/health', function(req, res){
-    res.send('1');
-});
-
-// Handler for GET /asciimo
-app.get('/asciimo', function(req, res){
-    var link="https://a248.e.akamai.net/assets.github.com/img/d84f00f173afcf3bc81b4fad855e39838b23d8ff/687474703a2f2f696d6775722e636f6d2f6b6d626a422e706e67";
-    res.send("<html><body><img src='" + link + "'></body></html>");
-});
-
-// Handler for GET /
-app.get('/', function(req, res){
-    res.send(zcache['index.html'], {'Content-Type': 'text/html'});
-});
-
-
-//  Get the environment variables we need.
-var ipaddr  = process.env.OPENSHIFT_INTERNAL_IP;
-var port    = process.env.OPENSHIFT_INTERNAL_PORT || 8080;
-
-if (typeof ipaddr === "undefined") {
-   console.warn('No OPENSHIFT_INTERNAL_IP environment variable');
+var retrieveUnemployment = function(callback) {
+	// Screen scrape BLS web page for latest unemployment information	
+	zombie.visit("http://data.bls.gov/timeseries/LNS14000000", function (err, browser, status) {
+		var unemploymentData = [];
+		
+		// Grab the unemployment table
+		var ths = browser.querySelectorAll("table.regular-data tbody th");
+		for (var i = 0; i < ths.length; i++) {
+			var unemploymentEntry = {};
+			
+			// Grab each row header and use it to set the year
+			var th = ths.item(i);
+			var year = th.innerHTML.trim();
+			
+			// Grab each cell in the row and use it to set the month and unemployment rate
+			var tds = th.parentNode.getElementsByTagName("td");
+			for(var j = 0; j < tds.length && j < 12; j++) {
+				var monthData = tds.item(j).innerHTML.trim();
+				if (monthData && monthData !== "&nbsp;") {
+					unemploymentEntry = {
+					    month: j + 1,
+					    year: parseFloat(year),
+					    rate: parseFloat(monthData)
+					};
+					unemploymentData.push(unemploymentEntry);
+				}
+			}
+		}
+		console.log("Retrieved unemployment data from BLS.");
+		callback(unemploymentData);
+	});
 }
 
-//  terminator === the termination handler.
-function terminator(sig) {
-   if (typeof sig === "string") {
-      console.log('%s: Received %s - terminating Node server ...',
-                  Date(Date.now()), sig);
-      process.exit(1);
-   }
-   console.log('%s: Node server stopped.', Date(Date.now()) );
-}
+var app = express.createServer();
 
-//  Process on exit and signals.
-process.on('exit', function() { terminator(); });
-
-['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT', 'SIGBUS',
- 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGPIPE', 'SIGTERM'
-].forEach(function(element, index, array) {
-    process.on(element, function() { terminator(element); });
+//Route: GET /unemployment -> Unemployment JSON data
+app.get("/unemployment", function(req, res) {
+	retrieveUnemployment(function(unemploymentData) {
+		res.header("Content-Type", "application/json");
+		res.end(JSON.stringify(unemploymentData));		
+	});	
 });
 
-//  And start the app on that interface (and port).
+//Get the environment variables we need.
+var ipaddr  = process.env.OPENSHIFT_INTERNAL_IP || "127.0.0.1";
+var port    = process.env.OPENSHIFT_INTERNAL_PORT || "3000";
+
+//And start the app on that interface (and port).
 app.listen(port, ipaddr, function() {
    console.log('%s: Node server started on %s:%d ...', Date(Date.now() ),
                ipaddr, port);
 });
-
