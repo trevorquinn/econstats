@@ -1,0 +1,17 @@
+{
+  "name": "econstats",
+  "version": "0.1.0",
+  "author": "Trevor Quinn",
+  "description": "U.S. economic dashboard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trevorquinn/econstats.git"
+  },
+  "keywords": [
+    "economics"
+  ],
+  "dependencies" : {
+    "zombie"   :  "0.12.13",
+    "jade"     :  "*"
+  }
+}
