@@ -12,6 +12,6 @@
   ],
   "dependencies" : {
     "zombie"   :  "0.12.13",
-    "jade"     :  "*"
+    "jade"     :  "0.26.1"
   }
 }
