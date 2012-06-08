@@ -1,0 +1,12 @@
+.chart {
+	width: 50%; 
+	height: 50%; 
+	float:left;
+}
+.questionMark {	
+	font-weight: bold; 
+	font-size: 24pt; 
+	position: relative; 
+	top:40%; 
+	text-align:center;
+}
