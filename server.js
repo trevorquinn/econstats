@@ -36,12 +36,29 @@ var retrieveUnemployment = function(callback) {
 
 var app = express.createServer();
 
+app.set('view options', {
+    layout : false
+});
+
+// Expose the static resources on two non-route URLs
+app.use("/js", express.static(__dirname + '/js'));
+app.use("/css", express.static(__dirname + '/css'));
+
 //Route: GET /unemployment -> Unemployment JSON data
 app.get("/unemployment", function(req, res) {
 	retrieveUnemployment(function(unemploymentData) {
 		res.header("Content-Type", "application/json");
 		res.end(JSON.stringify(unemploymentData));		
 	});	
+});
+
+//Route: GET /dashboard -> Jade template
+app.get("/dashboard", function(req, res) {
+    retrieveUnemployment(function(unemploymentData) {
+        res.render("index.jade", {
+            blsData : JSON.stringify(unemploymentData)
+        });
+    });
 });
 
 //Get the environment variables we need.
