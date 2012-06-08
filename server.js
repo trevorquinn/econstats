@@ -3,7 +3,8 @@ var zombie = require("zombie");
 
 var retrieveUnemployment = function(callback) {
 	// Screen scrape BLS web page for latest unemployment information	
-	zombie.visit("http://data.bls.gov/timeseries/LNS14000000", function (err, browser, status) {
+	zombie.visit("http://data.bls.gov/timeseries/LNS14000000", function (err, 
+	            browser, status) {
 		var unemploymentData = [];
 		
 		// Grab the unemployment table
@@ -15,7 +16,8 @@ var retrieveUnemployment = function(callback) {
 			var th = ths.item(i);
 			var year = th.innerHTML.trim();
 			
-			// Grab each cell in the row and use it to set the month and unemployment rate
+			// Grab each cell in the row and use it to set the month and 
+			// unemployment rate
 			var tds = th.parentNode.getElementsByTagName("td");
 			for(var j = 0; j < tds.length && j < 12; j++) {
 				var monthData = tds.item(j).innerHTML.trim();
