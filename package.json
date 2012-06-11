@@ -11,6 +11,7 @@
     "economics"
   ],
   "dependencies" : {
+    "express"  :  "2.5.9",
     "zombie"   :  "0.12.13",
     "jade"     :  "0.6.1"
   }
