@@ -36,6 +36,39 @@ var retrieveUnemployment = function(callback) {
 	});
 }
 
+var retrieveGDP = function(callback) {
+    // Screen scrape BEA table for GDP data   
+    zombie.visit("http://www.bea.gov/iTable/iTable.cfm?ReqID=9&step=1", function (err, 
+                browser, status) {
+        var gdpData = [];
+        
+        // Grab the GDP row from the table
+        var tr = browser.querySelectorAll("table.oneg_1 tbody tr")[0];
+        var gdpEntry = {};
+        
+        // Grab each row header and use it to set the year
+        //var th = ths.item(i);
+        //var year = th.innerHTML.trim();
+        
+        // Grab each cell in the row and use it to set the month and 
+        // unemployment rate
+        var tds = th.parentNode.getElementsByTagName("td");
+        for(var j = 0; j < tds.length; j++) {
+            var quarterData = tds.item(j).innerHTML.trim();
+            if (quarterData && monthData !== "&nbsp;") {
+                gdpEntry = {
+                    //month: j + 1,
+                    //year: parseFloat(year),
+                    pctChangeFromPrev: parseFloat(monthData)
+                };
+                gdpData.push(unemploymentEntry);
+            }
+        }
+        console.log("Retrieved GDP data from BEA.");
+        callback(gdpData);
+    });
+}
+
 var app = express.createServer();
 
 app.set('view options', {
@@ -49,9 +82,15 @@ app.use("/css", express.static(__dirname + '/css'));
 //Route: GET /unemployment -> Unemployment JSON data
 app.get("/unemployment", function(req, res) {
 	retrieveUnemployment(function(unemploymentData) {
-		res.header("Content-Type", "application/json");
-		res.end(JSON.stringify(unemploymentData));		
+		res.json(unemploymentData);		
 	});	
+});
+
+//Route: GET /unemployment -> Unemployment JSON data
+app.get("/gdp", function(req, res) {
+    retrieveGDP(function(gdpData) {
+        res.json(gdpData);      
+    }); 
 });
 
 //Route: GET /dashboard -> Jade template
