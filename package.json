@@ -13,6 +13,7 @@
   "dependencies" : {
     "express"  :  "2.5.9",
     "zombie"   :  "0.12.13",
-    "jade"     :  "0.26.1"
+    "jade"     :  "0.26.1",
+    "request"  :  "2.9.202"
   }
 }
