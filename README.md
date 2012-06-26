@@ -1,6 +1,6 @@
 A Dashboard of U.S. Economic Data
 
-[![Screenshot](https://github.com/trevorquinn/econstats/raw/master/screenshot.png)]
+![Screenshot](https://github.com/trevorquinn/econstats/raw/master/screenshot.png)
 
 For background on this project see:
 
