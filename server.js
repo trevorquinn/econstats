@@ -1,7 +1,6 @@
 var express = require("express");
 var zombie = require("zombie");
 var request = require("request");
-var lazy = require('lazy');
 
 var retrieveUnemployment = function(callback) {
     // Screen scrape BLS web page for latest unemployment information
@@ -73,6 +72,7 @@ var retrieveGDP = function(callback) {
                gdp: parseFloat(gdp[i].trim())
             });
         }
+        console.log("Retrieved GDP data from BEA.");
         callback(gdpJson);
     });
 
@@ -95,18 +95,21 @@ app.get("/unemployment", function(req, res) {
     });
 });
 
-// Route: GET /unemployment -> Unemployment JSON data
+// Route: GET /gdp -> GDP JSON data
 app.get("/gdp", function(req, res) {
     retrieveGDP(function(gdpData) {
-        res.send(gdpData);
+        res.json(gdpData);
     });
 });
 
 // Route: GET /dashboard -> Jade template
 app.get("/dashboard", function(req, res) {
     retrieveUnemployment(function(unemploymentData) {
-        res.render("index.jade", {
-            blsData : JSON.stringify(unemploymentData)
+        retrieveGDP(function(beaData) {
+            res.render("index.jade", {
+                blsData : JSON.stringify(unemploymentData),
+                beaData : JSON.stringify(beaData)
+            });    
         });
     });
 });
@@ -119,6 +122,4 @@ var port = process.env.OPENSHIFT_INTERNAL_PORT || "3000";
 app.listen(port, ipaddr, function() {
     console.log('%s: Node server started on %s:%d ...', Date(Date.now()),
             ipaddr, port);
-    retrieveGDP(function() {
-    });
 });

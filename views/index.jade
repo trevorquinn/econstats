@@ -1,18 +1,21 @@
 html
-	head
-		script(src='http://documentcloud.github.com/underscore/underscore-min.js')
-		script(src='https://www.google.com/jsapi')
-		script(type='text/javascript')
-			var blsData = !{blsData}
-		script(src='js/googleCharts.js')
-		link(rel='stylesheet', href='css/main.css')
-	body
-		title U.S. Economic Dashboard
-		h1 U.S. Economic Dashboard
-		#unempChart.chart
-		#chart2.chart
-			div.questionMark ?
-		#chart3.chart
-			div.questionMark ?
-		#chart4.chart
-			div.questionMark ?
+    head
+        script(src='http://documentcloud.github.com/underscore/underscore-min.js')
+        script(src='https://www.google.com/jsapi')
+        script(type='text/javascript')
+            var blsData = !{blsData}
+            var beaData = !{beaData}
+        script(src='js/googleCharts.js')
+        link(rel='stylesheet', href='css/main.css')
+    body
+        title U.S. Economic Dashboard
+        h1 U.S. Economic Dashboard
+        #unempChart.chart
+        #gdpChart.chart
+        #chart3.chart
+            div.questionMark ?
+        #chart4.chart
+            div.questionMark ?
+        p Built using 
+            | <a href='http://openshift.redhat.com'>OpenShift</a>, <a href='http://www.nodejs.org'>Node.js</a>, 
+            | and <a href='https://developers.google.com/chart/'>Google Charts</a>

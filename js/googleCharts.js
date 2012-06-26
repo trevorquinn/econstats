@@ -3,24 +3,23 @@ google.load("visualization", "1", {
 });
 google.setOnLoadCallback(drawChart);
 function drawChart() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('date', 'Month');
-    data.addColumn('number', 'Unemployment');
+    var unempData = new google.visualization.DataTable();
+    unempData.addColumn('date', 'Month');
+    unempData.addColumn('number', 'Unemployment');
 
     // Parsed blsData
     var parsedBLSData = [];
     _.each(blsData, function(blsDataItem) {
         var parsedBLSDataItem = [
                 new Date(blsDataItem.year, blsDataItem.month, 1),
-                blsDataItem.rate 
-        ];
+                blsDataItem.rate ];
         parsedBLSData.push(parsedBLSDataItem);
     }, this);
 
-    data.addRows(parsedBLSData);
+    unempData.addRows(parsedBLSData);
 
-    var options = {
-        title : 'U.S. Unemployment Rate',
+    var unempOptions = {
+        title : 'U.S. Unemployment Rate (%)',
         chartArea : {
             width : '90%',
             height : '75%'
@@ -34,7 +33,35 @@ function drawChart() {
         }
     };
 
-    var chart = new google.visualization.LineChart(document
+    var unempChart = new google.visualization.LineChart(document
             .getElementById('unempChart'));
-    chart.draw(data, options);
+    unempChart.draw(unempData, unempOptions);
+
+    var gdpData = new google.visualization.DataTable();
+    gdpData.addColumn('string', 'Quarter');
+    gdpData.addColumn('number', 'GDP');
+
+    // Parsed blsData
+    var parsedGDPData = [];
+    for (var i = beaData.length - 40; i < beaData.length; i++) {
+        parsedGDPData.push([ "Q" + beaData[i].quarter + " " + beaData[i].year.toString().substring(2,4),
+                             beaData[i].gdp ]);
+    }
+
+    gdpData.addRows(parsedGDPData);
+
+    var gdpOptions = {
+        title : 'U.S. GDP (% change from previous quarter)',
+        chartArea : {
+            width : '90%',
+            height : '75%'
+        },
+        legend : {
+            position : "none"
+        }
+    };
+
+    var gdpChart = new google.visualization.ColumnChart(document
+            .getElementById('gdpChart'));
+    gdpChart.draw(gdpData, gdpOptions);
 }
