@@ -33,9 +33,39 @@ function drawChart() {
         }
     };
 
+    var cpiData = new google.visualization.DataTable();
+    cpiData.addColumn('date', 'Month');
+    cpiData.addColumn('number', 'Consumer Price Index');
+
+    // Parsed blsCpiData
+    var parsedBLSCpiData = [];
+    _.each(blsCpiData, function(blsCpiDataItem) {
+        var parsedBLSCpiDataItem = [
+                new Date(blsCpiDataItem.year, blsCpiDataItem.month, 1),
+                blsCpiDataItem.rate ];
+        parsedBLSCpiData.push(parsedBLSCpiDataItem);
+    }, this);
+
+    cpiData.addRows(parsedBLSCpiData);
+
+    var cpiOptions = {
+        title : 'U.S. Consumer Price Index',
+        chartArea : {
+            width : '90%',
+            height : '75%'
+        },
+        legend : {
+            position : "none"
+        }
+    }
+
     var unempChart = new google.visualization.LineChart(document
             .getElementById('unempChart'));
     unempChart.draw(unempData, unempOptions);
+
+    var cpiChart = new google.visualization.LineChart(document
+            .getElementById('cpiChart'));
+    cpiChart.draw(cpiData, cpiOptions);
 
     var gdpData = new google.visualization.DataTable();
     gdpData.addColumn('string', 'Quarter');

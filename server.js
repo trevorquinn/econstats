@@ -37,6 +37,41 @@ var retrieveUnemployment = function(callback) {
     });
 }
 
+var retrieveConsumerPriceIndex8284 = function(callback) {
+    // Screen scrape BLS web page for latest cpi information
+    zombie.visit("http://data.bls.gov/timeseries/CUUR0000SA0", function(err,
+            browser, status) {
+        var cpiData = [];
+
+        // Grab the cpi table
+        var ths = browser.querySelectorAll("table.regular-data tbody th");
+        for ( var i = 0; i < ths.length; i++) {
+            var cpiEntry = {};
+
+            // Grab each row header and use it to set the year
+            var th = ths.item(i);
+            var year = th.innerHTML.trim();
+
+            // Grab each cell in the row and use it to set the month and
+            // cpi index
+            var tds = th.parentNode.getElementsByTagName("td");
+            for ( var j = 0; j < tds.length && j < 12; j++) {
+                var monthData = tds.item(j).innerHTML.trim();
+                if (monthData && monthData !== "&nbsp;") {
+                    cpiEntry = {
+                        month : j + 1,
+                        year : parseFloat(year),
+                        rate : parseFloat(monthData)
+                    };
+                    cpiData.push(cpiEntry);
+                }
+            }
+        }
+        console.log("Retrieved cpi data from BLS.");
+        callback(cpiData);
+    });
+}
+
 var retrieveGDP = function(callback) {
     var url = "http://www.bea.gov//national/nipaweb/GetCSV.asp?GetWhat=SS_Data/Section1All_csv.csv&Section=2";
     request(url, function(error, response, body) {
@@ -95,6 +130,13 @@ app.get("/unemployment", function(req, res) {
     });
 });
 
+// Route: GET /cpi -> CPI JSON data
+app.get("/cpi", function(req, res) {
+    retrieveConsumerPriceIndex8284(function(cpiData) {
+        res.json(cpiData);
+    });
+});
+
 // Route: GET /gdp -> GDP JSON data
 app.get("/gdp", function(req, res) {
     retrieveGDP(function(gdpData) {
@@ -106,10 +148,13 @@ app.get("/gdp", function(req, res) {
 app.get("/dashboard", function(req, res) {
     retrieveUnemployment(function(unemploymentData) {
         retrieveGDP(function(beaData) {
-            res.render("index.jade", {
-                blsData : JSON.stringify(unemploymentData),
-                beaData : JSON.stringify(beaData)
-            });    
+            retrieveConsumerPriceIndex8284(function(cpiData) {
+                res.render("index.jade", {
+                    blsData : JSON.stringify(unemploymentData),
+                    blsCpiData : JSON.stringify(cpiData),
+                    beaData : JSON.stringify(beaData)
+                });    	
+            });
         });
     });
 });
