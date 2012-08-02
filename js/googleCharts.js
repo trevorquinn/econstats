@@ -39,17 +39,21 @@ function drawChart() {
 
     // Parsed blsCpiData
     var parsedBLSCpiData = [];
-    _.each(blsCpiData, function(blsCpiDataItem) {
-        var parsedBLSCpiDataItem = [
-                new Date(blsCpiDataItem.year, blsCpiDataItem.month, 1),
-                blsCpiDataItem.rate ];
-        parsedBLSCpiData.push(parsedBLSCpiDataItem);
-    }, this);
-
+    // Start at idx = 1 because we are using percentage
+    // change from previous data point
+    for (var idx = 1; idx < blsCpiData.length; idx++) {
+        var prevBlsCpiDataItem = blsCpiData[idx - 1];
+        var blsCpiDataItem = blsCpiData[idx];
+        var percentChange = ((blsCpiDataItem.rate - prevBlsCpiDataItem.rate) / prevBlsCpiDataItem.rate) * 100;
+        var parsedBLSCpiDataItem = [ 
+            new Date(blsCpiDataItem.year, blsCpiDataItem.month, 1),
+            percentChange ];
+        parsedBLSCpiData.push(parsedBLSCpiDataItem);    
+    }
     cpiData.addRows(parsedBLSCpiData);
 
     var cpiOptions = {
-        title : 'U.S. Consumer Price Index',
+        title : 'U.S. Consumer Price Index (% change from previous month)',
         chartArea : {
             width : '90%',
             height : '75%'
