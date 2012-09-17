@@ -113,6 +113,47 @@ var retrieveGDP = function(callback) {
 
 }
 
+var retrieveEarnings = function(callback) {
+    // Screen scrape BLS web page for latest unemployment information
+    zombie.visit("http://data.bls.gov/cgi-bin/srgate", function(err,
+            browser, status) {
+        var earningsData = [];
+
+        // Fill in a text area with the name "series_id" with the series for
+        // weekly earnings, press the submit button, then press the "Retrieve Data"
+        // button on the resulting page
+        browser.
+            fill("series_id", "LES1252881600").
+            pressButton(".submit-button", function(err, browser, status) {
+                browser.pressButton("Retrieve Data", function(err, browser, status) {
+                    // Define the processing function for earnings data 
+                    var ths = browser.querySelectorAll("table.regular-data tbody th");
+                    for ( var i = 0; i < ths.length; i++) {
+                        var earningsEntry = {};
+
+                        var th = ths.item(i);
+                        var year = th.innerHTML.trim();
+
+                        var tds = th.parentNode.getElementsByTagName("td");
+                        for ( var j = 0; j < tds.length && j < 4; j++) {
+                            var quarterData = tds.item(j).innerHTML.trim();
+                            if (quarterData && quarterData !== "&nbsp;") {
+                                earningsEntry = {
+                                    quarter : j + 1,
+                                    year : parseFloat(year),
+                                    earnings : parseFloat(quarterData)
+                                };
+                                earningsData.push(earningsEntry);
+                            }
+                        }
+                    }
+                    console.log("Retrieved earnings data from BLS.");
+                    callback(earningsData);
+                });
+            });
+    });
+}
+
 var app = express.createServer();
 
 app.set('view options', {
@@ -144,16 +185,26 @@ app.get("/gdp", function(req, res) {
     });
 });
 
+//Route: GET /gdp -> GDP JSON data
+app.get("/earnings", function(req, res) {
+    retrieveEarnings(function(earnings) {
+        res.json(earnings);
+    });
+});
+
 // Route: GET /dashboard -> Jade template
 app.get("/dashboard", function(req, res) {
     retrieveUnemployment(function(unemploymentData) {
         retrieveGDP(function(beaData) {
             retrieveConsumerPriceIndex8284(function(cpiData) {
-                res.render("index.jade", {
-                    blsData : JSON.stringify(unemploymentData),
-                    blsCpiData : JSON.stringify(cpiData),
-                    beaData : JSON.stringify(beaData)
-                });    	
+                retrieveEarnings(function(earningsData) {
+                    res.render("index.jade", {
+                        blsData : JSON.stringify(unemploymentData),
+                        blsCpiData : JSON.stringify(cpiData),
+                        beaData : JSON.stringify(beaData),
+                        blsEarningsData : JSON.stringify(earningsData)
+                    });    	
+                });
             });
         });
     });

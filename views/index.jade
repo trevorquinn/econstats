@@ -6,6 +6,7 @@ html
             var blsData = !{blsData}
             var blsCpiData = !{blsCpiData}
             var beaData = !{beaData}
+            var blsEarningsData = !{blsEarningsData}
         script(src='js/googleCharts.js')
         link(rel='stylesheet', href='css/main.css')
     body
@@ -14,8 +15,7 @@ html
         #unempChart.chart
         #gdpChart.chart
         #cpiChart.chart
-        #chart4.chart
-            div.questionMark ?
+        #earningsChart.chart
         p Built using 
             | <a href='http://openshift.redhat.com'>OpenShift</a>, <a href='http://www.nodejs.org'>Node.js</a>, 
             | and <a href='https://developers.google.com/chart/'>Google Charts</a>
